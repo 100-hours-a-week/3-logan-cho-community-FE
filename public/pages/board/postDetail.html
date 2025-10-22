@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>게시글 상세 - Kaboocam</title>
+    <link rel="stylesheet" href="/css/reset.css" />
+    <link rel="stylesheet" href="/css/theme.css" />
+    <link rel="stylesheet" href="/css/layout.css" />
+    <link rel="stylesheet" href="/pages/board/postDetail.css" />
+  </head>
+  <body>
+    <div class="page-wrapper">
+      <main class="main-content">
+        <div class="container">
+          <!-- Post Header -->
+          <section class="post-header">
+            <h1 id="post-title" class="post-title"></h1>
+            <div class="post-meta-info">
+              <div class="post-author">
+                <img id="author-avatar" src="/user-profile-illustration.png" alt="Author" class="author-avatar" />
+                <div class="author-details">
+                  <span id="author-name" class="author-name"></span>
+                  <span id="post-date" class="post-date"></span>
+                </div>
+              </div>
+              <div id="edit-badge" class="edit-badge" style="display: none;">수정됨</div>
+            </div>
+          </section>
+
+          <!-- Post Images -->
+          <section id="post-images" class="post-images">
+            <div id="image-placeholder" class="image-placeholder" style="display: none;">
+              <div class="placeholder-icon">📷</div>
+              <p>이미지가 없습니다</p>
+            </div>
+          </section>
+
+          <!-- Post Content -->
+          <article id="post-content" class="post-content"></article>
+
+          <!-- Post Stats -->
+          <section class="post-stats">
+            <div class="stats-card">
+              <div class="stat-item">
+                <img src="/like.png" alt="좋아요" class="stat-icon" />
+                <span id="like-count" class="stat-count">0</span>
+              </div>
+              <div class="stat-item">
+                <img src="/comment.png" alt="댓글" class="stat-icon" />
+                <span id="comment-count" class="stat-count">0</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-icon">👁️</span>
+                <span id="view-count" class="stat-count">0</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Comments Section -->
+          <section class="comments-section">
+            <div class="comments-header">
+              <h3 class="comments-title">댓글 <span id="comments-count">0</span></h3>
+            </div>
+
+            <!-- Comment Form -->
+            <div id="comment-form-container" class="comment-form-container">
+              <form id="comment-form" class="comment-form">
+                <textarea 
+                  id="comment-input" 
+                  class="comment-input" 
+                  placeholder="댓글을 작성해주세요..."
+                  maxlength="500"
+                  rows="3"
+                ></textarea>
+                <div class="comment-form-footer">
+                  <span id="comment-char-count" class="char-count">0/500</span>
+                  <button type="submit" class="btn btn-primary btn-submit-comment">댓글 작성</button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Comments List -->
+            <div id="comments-list" class="comments-list">
+              <!-- Comments will be loaded here -->
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <script type="module" src="/js/common.js"></script>
+    <script type="module" src="/pages/board/postDetail.js"></script>
+  </body>
+</html>

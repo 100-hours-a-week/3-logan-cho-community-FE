@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>홈 - Kaboocam</title>
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/components/post-card.css">
+  <link rel="stylesheet" href="/pages/home/home.css">
+</head>
+<body>
+  <div class="page-wrapper">
+    <main class="main-content">
+      <div class="container">
+        <!-- Hero Section -->
+        <section class="hero">
+          <h1 class="hero-title">Kaboocam에 오신 것을 환영합니다</h1>
+          <p class="hero-subtitle">다양한 이야기를 나누고 소통하세요</p>
+        </section>
+
+        <!-- Popular Posts Section -->
+        <section class="posts-section">
+          <div class="section-header">
+            <h2 class="section-title">🔥 인기글</h2>
+            <a href="/board" class="section-link">더보기 →</a>
+          </div>
+          <div class="posts-list" id="popular-posts">
+            <!-- Popular posts will be inserted here -->
+          </div>
+        </section>
+
+        <!-- Recent Posts Section -->
+        <section class="posts-section">
+          <div class="section-header">
+            <h2 class="section-title">🆕 최신글</h2>
+            <a href="/board" class="section-link">더보기 →</a>
+          </div>
+          <div class="posts-list" id="recent-posts">
+            <!-- Recent posts will be inserted here -->
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="/js/common.js"></script>
+  <script type="module" src="/pages/home/home.js"></script>
+</body>
+</html>

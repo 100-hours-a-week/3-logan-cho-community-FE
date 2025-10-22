@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>마이페이지 - Kaboocam</title>
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/pages/mypage/mypage.css">
+</head>
+<body>
+  <div class="page-wrapper">
+    <main class="main-content">
+      <div class="container">
+        <!-- Profile Section -->
+        <section class="profile-section">
+          <div class="profile-header">
+            <div class="profile-image-container">
+              <img id="profile-image" src="/user-profile-illustration.png" alt="프로필 이미지" class="profile-image">
+              <div class="image-hover-text" id="image-hover-text">이미지 변경</div>
+              <input type="file" id="profile-image-input" accept="image/*" hidden>
+            </div>
+            <div class="profile-info">
+              <h1 class="profile-name" id="profile-name">사용자 이름</h1>
+              <p class="profile-email" id="profile-email">user@example.com</p>
+            </div>
+          </div>
+          
+          <!-- Action Links -->
+          <div class="profile-actions">
+            <span class="action-link" id="change-nickname-link">닉네임 변경</span>
+            <span class="action-link" id="change-password-link">비밀번호 변경</span>
+            <span class="action-link delete-link" id="delete-account-link">회원 탈퇴하기</span>
+          </div>
+          
+          <!-- Links -->
+          <div class="profile-links">
+            <a href="#" class="profile-link">불편신고</a>
+            <a href="#" class="profile-link">이용약관</a>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Nickname Change Modal -->
+  <div class="modal-overlay" id="nickname-modal" style="display: none;">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">닉네임 변경</h3>
+        <button class="modal-close" id="close-nickname-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="nickname-form">
+          <div class="form-group">
+            <label for="nickname-input" class="form-label">새 닉네임</label>
+            <input 
+              type="text" 
+              id="nickname-input" 
+              class="form-input" 
+              placeholder="새 닉네임을 입력하세요"
+              required
+            >
+            <div class="form-error" id="nickname-error"></div>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" id="cancel-nickname-btn">취소</button>
+            <button type="submit" class="btn btn-primary">변경</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Password Change Modal -->
+  <div class="modal-overlay" id="password-modal" style="display: none;">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">비밀번호 변경</h3>
+        <button class="modal-close" id="close-password-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="password-form">
+          <div class="form-group">
+            <label for="current-password" class="form-label">현재 비밀번호</label>
+            <input 
+              type="password" 
+              id="current-password" 
+              class="form-input" 
+              placeholder="현재 비밀번호를 입력하세요"
+              required
+            >
+            <div class="form-error" id="current-password-error"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="new-password" class="form-label">새 비밀번호</label>
+            <input 
+              type="password" 
+              id="new-password" 
+              class="form-input" 
+              placeholder="새 비밀번호를 입력하세요"
+              required
+            >
+            <div class="form-helper">8자 이상, 영문/숫자/특수문자 포함</div>
+            <div class="form-error" id="new-password-error"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="new-password-confirm" class="form-label">새 비밀번호 확인</label>
+            <input 
+              type="password" 
+              id="new-password-confirm" 
+              class="form-input" 
+              placeholder="새 비밀번호를 다시 입력하세요"
+              required
+            >
+            <div class="form-error" id="new-password-confirm-error"></div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" id="cancel-password-btn">취소</button>
+            <button type="submit" class="btn btn-primary">변경</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Account Deletion Modal -->
+  <div class="modal-overlay" id="delete-modal" style="display: none;">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">회원 탈퇴</h3>
+        <button class="modal-close" id="close-delete-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="delete-warning">
+          <p class="warning-text">정말로 삭제하시겠습니까?</p>
+          <p class="warning-subtext">삭제 후 90일 이내엔 계정을 복구할 수 있습니다.</p>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" id="cancel-delete-btn">취소</button>
+          <button type="button" class="btn btn-danger" id="confirm-delete-btn">삭제</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/js/common.js"></script>
+  <script type="module" src="/pages/mypage/mypage.js"></script>
+</body>
+</html>

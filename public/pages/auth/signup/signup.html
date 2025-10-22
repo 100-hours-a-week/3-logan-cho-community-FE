@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>회원가입 - Kaboocam</title>
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/pages/auth/signup/signup.css">
+</head>
+<body>
+  <div class="page-wrapper">
+    <main class="main-content">
+      <div class="signup-container">
+        <div class="signup-card card">
+          <h1 class="signup-title">회원가입</h1>
+          <p class="signup-subtitle">새로운 계정을 만들어보세요</p>
+
+          <form id="signup-form" class="signup-form">
+            <!-- Profile Image -->
+            <div class="form-group">
+              <label class="form-label">프로필 이미지 (선택)</label>
+              <div class="profile-upload">
+                <div class="profile-preview" id="profile-preview">
+                  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                </div>
+                <input type="file" id="profile-image" accept="image/*" hidden>
+                <button type="button" class="btn btn-outline" id="upload-btn">이미지 선택</button>
+              </div>
+            </div>
+
+            <!-- Name -->
+            <div class="form-group">
+              <label for="name" class="form-label">이름</label>
+              <input 
+                type="text" 
+                id="name" 
+                class="form-input" 
+                placeholder="이름을 입력하세요"
+                required
+              >
+              <div class="form-error" id="name-error"></div>
+            </div>
+
+            <!-- Email -->
+            <div class="form-group">
+              <label for="email" class="form-label">이메일</label>
+              <div class="input-with-button">
+                <input 
+                  type="email" 
+                  id="email" 
+                  class="form-input" 
+                  placeholder="example@email.com"
+                  required
+                >
+                <button type="button" class="btn btn-outline" id="check-email-btn">중복검사</button>
+              </div>
+              <div class="form-error" id="email-error"></div>
+              <div class="form-helper" id="email-helper"></div>
+            </div>
+
+            <!-- Password -->
+            <div class="form-group">
+              <label for="password" class="form-label">비밀번호</label>
+              <input 
+                type="password" 
+                id="password" 
+                class="form-input" 
+                placeholder="비밀번호를 입력하세요"
+                required
+              >
+              <div class="form-error" id="password-error"></div>
+              <div class="form-helper">8자 이상, 영문/숫자/특수문자 포함</div>
+            </div>
+
+            <!-- Password Confirm -->
+            <div class="form-group">
+              <label for="password-confirm" class="form-label">비밀번호 확인</label>
+              <input 
+                type="password" 
+                id="password-confirm" 
+                class="form-input" 
+                placeholder="비밀번호를 다시 입력하세요"
+                required
+              >
+              <div class="form-error" id="password-confirm-error"></div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-full">
+              회원가입
+            </button>
+
+            <div class="signup-footer">
+              <span class="text-secondary">이미 계정이 있으신가요?</span>
+              <a href="/login" class="signup-link">로그인</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="/js/common.js"></script>
+  <script type="module" src="/pages/auth/signup/signup.js"></script>
+</body>
+</html>
+
