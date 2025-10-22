@@ -211,22 +211,49 @@ const api = {
   // ==================== Post API ====================
 
   /**
-   * Get posts with cursor-based pagination
-   * GET /api/posts?strategy=RECENT|POPULAR or GET /api/posts?cursor=xxx
-   * @param {Object} params - { strategy: 'RECENT'|'POPULAR', cursor: string }
-   * @returns {Promise<{items: Array, nextCursor: string, hasNext: boolean}>}
-   */
+ * Get posts with cursor-based pagination
+ * GET /api/posts?strategy=RECENT|POPULAR&cursor=xxx
+ * @param {Object} params - { strategy?: 'RECENT'|'POPULAR', cursor?: string }
+ * @returns {Promise<{
+ *   cdnBaseUrl: string,
+  *   posts: {
+  *     items: Array<{
+  *       postId: string,
+  *       title: string,
+  *       views: number,
+  *       createdAt: string,
+  *       author: { id: number, name: string, profileImageObjectKey: string },
+  *       like: { count: number, amILike: boolean }
+  *     }>,
+  *     nextCursor: string,
+  *     hasNext: boolean
+  *   }
+  * }>}
+  */
+ 
   async getPosts({ strategy, cursor }) {
     const params = cursor ? { cursor } : { strategy }
     return await this.get("/api/posts", { params })
   },
 
   /**
-   * Get post detail
-   * GET /api/posts/{postId}
-   * @param {string} postId
-   * @returns {Promise<{title, content, imageUrls, views, likes, amILiking, createdAt, isUpdated}>}
-   */
+ * Get post detail
+ * GET /api/posts/{postId}
+ * @param {string} postId
+ * @returns {Promise<{
+ *   cdnBaseUrl: string,
+  *   title: string,
+  *   content: string,
+  *   imageObjectKeys: string[],
+  *   authorProfile: { id: number, name: string, profileImageObjectKey: string },
+  *   views: number,
+  *   likes: number,
+  *   amILiking: boolean,
+  *   createdAt: string,
+  *   isUpdated: boolean,
+  *   isMine: boolean
+  * }>}
+  */
   async getPostDetail(postId) {
     return await this.get(`/api/posts/${postId}`)
   },
@@ -244,7 +271,7 @@ const api = {
    * Update post
    * PUT /api/posts/{postId}
    * @param {string} postId
-   * @param {Object} data - { title, contents, addedImageObjectKeys, removedImageObjectKeys }
+   * @param {Object} data - { title, content, addedImageObjectKeys, removedImageObjectKeys }
    */
   async updatePost(postId, data) {
     return await this.put(`/api/posts/${postId}`, data)
@@ -289,34 +316,60 @@ const api = {
     return await this.post(`/api/posts/${postId}/comments`, { content })
   },
 
+    /**
+   * Get comments for a post (with isMine)
+   * GET /api/posts/{postId}/comments
+   * @param {string} postId
+   * @param {string} [cursor]
+   * @returns {Promise<{
+    *   cdnBaseUrl: string,
+    *   parentId: string,
+    *   comments: {
+    *     items: Array<{
+    *       commentId: string,
+    *       content: string,
+    *       createdAt: string,
+    *       isUpdated: boolean,
+    *       isMine: boolean,
+    *       author: { id: number, name: string, profileImageObjectKey: string }
+    *     }>,
+    *     nextCursor: string,
+    *     hasNext: boolean
+    *   }
+    * }>}
+    */
+   async getCommentList(postId, cursor) {
+     const params = cursor ? { cursor } : undefined
+     return await this.get(`/api/posts/${postId}/comments`, { params })
+   },
+
   /**
    * Update comment
-   * PUT /api/posts/{postId}/comments/{commentId}
-   * @param {string} postId
+   * PUT /api/posts/comments/{commentId}
    * @param {string} commentId
    * @param {string} content
    */
-  async updateComment(postId, commentId, content) {
-    return await this.put(`/api/posts/${postId}/comments/${commentId}`, { content })
+  async updateComment( commentId, content) {
+    return await this.put(`/api/posts/comments/${commentId}`, { content })
   },
 
   /**
    * Delete comment
-   * DELETE /api/posts/{postId}/comments/{commentId}
-   * @param {string} postId
+   * DELETE /api/posts/comments/{commentId}
    * @param {string} commentId
    */
-  async deleteComment(postId, commentId) {
-    return await this.delete(`/api/posts/${postId}/comments/${commentId}`)
+  async deleteComment( commentId) {
+    return await this.delete(`/api/posts/comments/${commentId}`)
   },
 
   // ==================== Member API ====================
 
   /**
-   * Get my profile
-   * GET /api/members
-   * @returns {Promise<{id, name, profileImageObjectKey}>}
-   */
+ * Get my profile (includes email)
+ * GET /api/members
+ * @returns {Promise<{ memberId: number, name: string, imageObjectKey: string, email: string }>}
+ */
+
   async getProfile() {
     return await this.get("/api/members")
   },
@@ -329,6 +382,16 @@ const api = {
   async register(data) {
     return await this.post("/api/members", data, { skipAuth: true })
   },
+
+  /**
+ * Check email duplication
+ * POST /api/auth/check-email
+ * @param {string} email
+ * @returns {Promise<boolean>} - true if available, false if duplicate
+ */
+async checkEmailDuplicate(email) {
+  return await this.post("/api/auth/check-email", { email }, { skipAuth: true })
+},
 
   /**
    * Delete account
@@ -369,14 +432,13 @@ const api = {
   // ==================== S3 API ====================
 
   /**
-   * Get presigned URLs for post images
-   * POST /api/posts/{postId}/images/presigned-url
-   * @param {string} postId
-   * @param {Array} files - [{ fileName, mimeType }]
-   * @returns {Promise<{urls: [{presignedUrl, objectKey}]}>}
-   */
-  async getPostPresignedUrls(postId, files) {
-    return await this.post(`/api/posts/${postId}/images/presigned-url`, { files })
+ * Get presigned URLs for post images
+ * POST /api/posts/images/presigned-url
+ * @param {Array<{ fileName: string, mimeType: string }>} files
+ * @returns {Promise<{ urls: Array<{ presignedUrl: string, objectKey: string }> }>}
+ */
+  async getPostPresignedUrls(files) {
+    return await this.post(`/api/posts/images/presigned-url`, { files })
   },
 
   /**
