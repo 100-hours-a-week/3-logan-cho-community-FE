@@ -15,9 +15,16 @@
     <div class="page-wrapper">
       <main class="main-content">
         <div class="container">
-          <!-- Post Header -->
-          <section class="post-header">
-            <h1 id="post-title" class="post-title"></h1>
+          <div class="post-detail-container">
+            <!-- Post Header -->
+            <section class="post-header">
+            <div class="post-header-top">
+              <h1 id="post-title" class="post-title"></h1>
+              <div id="post-actions" class="post-actions" style="display: none;">
+                <button class="btn btn-outline btn-sm" id="edit-post-btn">수정</button>
+                <button class="btn btn-danger btn-sm" id="delete-post-btn">삭제</button>
+              </div>
+            </div>
             <div class="post-meta-info">
               <div class="post-author">
                 <img id="author-avatar" src="/user-profile-illustration.png" alt="Author" class="author-avatar" />
@@ -32,10 +39,7 @@
 
           <!-- Post Images -->
           <section id="post-images" class="post-images">
-            <div id="image-placeholder" class="image-placeholder" style="display: none;">
-              <div class="placeholder-icon">📷</div>
-              <p>이미지가 없습니다</p>
-            </div>
+            <!-- Images will be inserted here -->
           </section>
 
           <!-- Post Content -->
@@ -44,16 +48,16 @@
           <!-- Post Stats -->
           <section class="post-stats">
             <div class="stats-card">
-              <div class="stat-item">
-                <img src="/like.png" alt="좋아요" class="stat-icon" />
+              <button class="stat-item stat-item-btn" id="like-btn">
+                <img id="like-icon" src="/like.png" alt="좋아요" class="stat-icon" />
                 <span id="like-count" class="stat-count">0</span>
-              </div>
+              </button>
               <div class="stat-item">
                 <img src="/comment.png" alt="댓글" class="stat-icon" />
                 <span id="comment-count" class="stat-count">0</span>
               </div>
               <div class="stat-item">
-                <span class="stat-icon">👁️</span>
+                <span class="stat-label">조회</span>
                 <span id="view-count" class="stat-count">0</span>
               </div>
             </div>
@@ -72,12 +76,10 @@
                   id="comment-input" 
                   class="comment-input" 
                   placeholder="댓글을 작성해주세요..."
-                  maxlength="500"
-                  rows="3"
+                  rows="1"
                 ></textarea>
                 <div class="comment-form-footer">
-                  <span id="comment-char-count" class="char-count">0/500</span>
-                  <button type="submit" class="btn btn-primary btn-submit-comment">댓글 작성</button>
+                  <button type="submit" class="btn-submit-comment">작성</button>
                 </div>
               </form>
             </div>
@@ -87,6 +89,7 @@
               <!-- Comments will be loaded here -->
             </div>
           </section>
+          </div>
         </div>
       </main>
     </div>

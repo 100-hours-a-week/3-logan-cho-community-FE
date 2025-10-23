@@ -1,6 +1,7 @@
 import { api } from "/js/api.js"
 import { storage } from "/js/storage.js"
 import { dom } from "/js/dom.js"
+import { cdn } from "/js/cdn.js"
 
 // Redirect if not logged in
 if (!storage.hasToken()) {
@@ -33,6 +34,8 @@ const closeDeleteModal = dom.qs("#close-delete-modal")
 const cancelDeleteBtn = dom.qs("#cancel-delete-btn")
 const confirmDeleteBtn = dom.qs("#confirm-delete-btn")
 
+const logoutBtn = dom.qs("#logout-btn")
+
 let selectedFile = null
 
 // Load user profile
@@ -40,10 +43,33 @@ async function loadProfile() {
   try {
     const profile = await api.getProfile()
 
-    // Update display
-    profileImage.src = profile.profileImageObjectKey
-      ? `${profile.profileImageObjectKey}`
-      : "/user-profile-illustration.png"
+    // Update display - profile image with CDN
+    if (profile.imageObjectKey) {
+      // For mypage, we might need CDN base URL - check if it's provided
+      // If not, try to use the image object key directly or with a CDN helper
+      try {
+        // First try to load the image directly
+        profileImage.src = profile.imageObjectKey
+        
+        // If it fails, we'll handle it in the error event
+        profileImage.addEventListener("error", async () => {
+          try {
+            // Try to get CDN URL if available
+            // For now, use placeholder as fallback
+            profileImage.src = "/user-profile-illustration.png"
+          } catch (err) {
+            console.error("Failed to load profile image:", err)
+            profileImage.src = "/user-profile-illustration.png"
+          }
+        }, { once: true })
+      } catch (error) {
+        console.error("Profile image error:", error)
+        profileImage.src = "/user-profile-illustration.png"
+      }
+    } else {
+      profileImage.src = "/user-profile-illustration.png"
+    }
+    
     profileName.textContent = profile.name
     profileEmail.textContent = profile.email || "이메일 정보 없음"
 
@@ -285,6 +311,31 @@ confirmDeleteBtn.addEventListener("click", async () => {
   } finally {
     dom.hideSpinner(spinner)
     closeDeleteModalFunc()
+  }
+})
+
+// Logout handler
+logoutBtn?.addEventListener("click", async () => {
+  if (!confirm("로그아웃 하시겠습니까?")) {
+    return
+  }
+
+  const spinner = dom.showSpinner()
+
+  try {
+    await api.logout()
+    dom.showToast("로그아웃 되었습니다")
+    
+    // Clear storage and redirect to login
+    storage.clearAll()
+    setTimeout(() => {
+      window.location.href = "/login"
+    }, 1000)
+  } catch (error) {
+    console.error("Logout error:", error)
+    dom.showToast(error.message || "로그아웃에 실패했습니다", "error")
+  } finally {
+    dom.hideSpinner(spinner)
   }
 })
 

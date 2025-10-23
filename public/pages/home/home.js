@@ -1,12 +1,14 @@
 import { api } from "/js/api.js"
 import { dom } from "/js/dom.js"
+import { cdn } from "/js/cdn.js"
 
 async function loadPopularPosts() {
   const container = dom.qs("#popular-posts")
 
   try {
     const response = await api.getPosts({ strategy: "POPULAR" })
-    const posts = response.items.slice(0, 3)
+    const cdnBaseUrl = response.cdnBaseUrl || ""
+    const posts = response.posts?.items?.slice(0, 3) || []
 
     if (!posts || posts.length === 0) {
       container.innerHTML = '<div class="empty-state">아직 게시글이 없습니다</div>'
@@ -15,7 +17,7 @@ async function loadPopularPosts() {
 
     container.innerHTML = ""
     posts.forEach((post) => {
-      container.appendChild(createPostCard(post))
+      container.appendChild(createPostCard(post, cdnBaseUrl))
     })
   } catch (error) {
     console.error("Failed to load popular posts:", error)
@@ -28,7 +30,8 @@ async function loadRecentPosts() {
 
   try {
     const response = await api.getPosts({ strategy: "RECENT" })
-    const posts = response.items.slice(0, 3)
+    const cdnBaseUrl = response.cdnBaseUrl || ""
+    const posts = response.posts?.items?.slice(0, 3) || []
 
     if (!posts || posts.length === 0) {
       container.innerHTML = '<div class="empty-state">아직 게시글이 없습니다</div>'
@@ -37,7 +40,7 @@ async function loadRecentPosts() {
 
     container.innerHTML = ""
     posts.forEach((post) => {
-      container.appendChild(createPostCard(post))
+      container.appendChild(createPostCard(post, cdnBaseUrl))
     })
   } catch (error) {
     console.error("Failed to load recent posts:", error)
@@ -45,7 +48,7 @@ async function loadRecentPosts() {
   }
 }
 
-function createPostCard(post) {
+function createPostCard(post, cdnBaseUrl = "") {
   const card = dom.create("article", { className: "post-card" })
   
   const cardContent = dom.create("div", { className: "post-card-content" })
@@ -101,7 +104,29 @@ function createPostCard(post) {
   cardContent.appendChild(mainContent)
   
   // Thumbnail (1:1 aspect ratio on the right)
-  if (post.imageUrl) {
+  if (post.imageObjectKeys && post.imageObjectKeys.length > 0 && cdnBaseUrl) {
+    const thumbnailUrl = cdn.getUrl(cdnBaseUrl, post.imageObjectKeys[0])
+    const thumbnail = dom.create("img", {
+      src: thumbnailUrl,
+      alt: post.title,
+      className: "post-card-thumbnail",
+    })
+    
+    // Handle image load error with signed cookie retry
+    thumbnail.addEventListener("error", async () => {
+      try {
+        const blob = await cdn.fetchImage(cdnBaseUrl, post.imageObjectKeys[0])
+        thumbnail.src = URL.createObjectURL(blob)
+      } catch (error) {
+        console.error("Failed to load thumbnail:", error)
+        // Show placeholder on error
+        const placeholder = dom.create("div", { className: "post-card-thumbnail-placeholder" }, ["📷"])
+        thumbnail.replaceWith(placeholder)
+      }
+    })
+    
+    cardContent.appendChild(thumbnail)
+  } else if (post.imageUrl) {
     const thumbnail = dom.create("img", {
       src: post.imageUrl,
       alt: post.title,

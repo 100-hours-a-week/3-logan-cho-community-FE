@@ -65,9 +65,9 @@ checkEmailBtn.addEventListener("click", async () => {
 
   try {
     // Call API to check email duplication
-    // Adjust endpoint as needed
-    await api.get("/api/members/check-email", { params: { email } })
-
+    const result = await api.checkEmailDuplicate(email)
+    
+    // If result is true or the API returns success, email is available
     emailHelper.textContent = "사용 가능한 이메일입니다"
     emailHelper.classList.add("success")
     emailChecked = true

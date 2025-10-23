@@ -1,5 +1,6 @@
 import { api } from "/js/api.js"
 import { dom } from "/js/dom.js"
+import { cdn } from "/js/cdn.js"
 
 let currentStrategy = "POPULAR"
 let nextCursor = null
@@ -75,7 +76,8 @@ async function loadPosts() {
       cursor: nextCursor,
     })
 
-    const { items, nextCursor: newCursor, hasNext: newHasNext } = response
+    const cdnBaseUrl = response.cdnBaseUrl || ""
+    const { items, nextCursor: newCursor, hasNext: newHasNext } = response.posts || {}
 
     if (!items || items.length === 0) {
       hasNext = false
@@ -90,7 +92,7 @@ async function loadPosts() {
     }
 
     items.forEach((post) => {
-      postsList.appendChild(createPostCard(post))
+      postsList.appendChild(createPostCard(post, cdnBaseUrl))
     })
 
     nextCursor = newCursor
@@ -111,7 +113,7 @@ async function loadPosts() {
   }
 }
 
-function createPostCard(post) {
+function createPostCard(post, cdnBaseUrl = "") {
   const card = dom.create("article", { className: "post-card" })
   
   const cardContent = dom.create("div", { className: "post-card-content" })
@@ -166,7 +168,29 @@ function createPostCard(post) {
   cardContent.appendChild(mainContent)
   
   // Thumbnail (1:1 aspect ratio on the right)
-  if (post.imageUrl) {
+  if (post.imageObjectKeys && post.imageObjectKeys.length > 0 && cdnBaseUrl) {
+    const thumbnailUrl = cdn.getUrl(cdnBaseUrl, post.imageObjectKeys[0])
+    const thumbnail = dom.create("img", {
+      src: thumbnailUrl,
+      alt: post.title,
+      className: "post-card-thumbnail",
+    })
+    
+    // Handle image load error with signed cookie retry
+    thumbnail.addEventListener("error", async () => {
+      try {
+        const blob = await cdn.fetchImage(cdnBaseUrl, post.imageObjectKeys[0])
+        thumbnail.src = URL.createObjectURL(blob)
+      } catch (error) {
+        console.error("Failed to load thumbnail:", error)
+        // Show placeholder on error
+        const placeholder = dom.create("div", { className: "post-card-thumbnail-placeholder" }, ["📷"])
+        thumbnail.replaceWith(placeholder)
+      }
+    })
+    
+    cardContent.appendChild(thumbnail)
+  } else if (post.imageUrl) {
     const thumbnail = dom.create("img", {
       src: post.imageUrl,
       alt: post.title,
