@@ -1,0 +1,176 @@
+/* MyPage Dropdown Component */
+.mypage-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  width: 320px;
+  max-height: 80vh;
+  overflow-y: auto;
+  z-index: 1000;
+  display: none;
+}
+
+.mypage-dropdown.active {
+  display: block;
+}
+
+.mypage-dropdown-content {
+  padding: var(--space-lg);
+}
+
+/* Profile Section */
+.mypage-profile {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.mypage-profile-image-container {
+  position: relative;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.mypage-profile-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--color-background-secondary);
+  border: 2px solid #e5e7eb;
+}
+
+.mypage-image-hover-text {
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #6b7280;
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.mypage-profile-image-container:hover .mypage-image-hover-text {
+  opacity: 1;
+}
+
+.mypage-profile-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.mypage-profile-name {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mypage-profile-email {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Action Links */
+.mypage-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.mypage-action-link {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: var(--space-xs) 0;
+}
+
+.mypage-action-link:hover {
+  color: var(--color-primary);
+}
+
+.mypage-delete-link {
+  color: var(--color-error) !important;
+}
+
+.mypage-delete-link:hover {
+  text-decoration: underline;
+}
+
+/* Links */
+.mypage-links {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.mypage-links-left {
+  display: flex;
+  gap: var(--space-md);
+}
+
+.mypage-link {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: color 0.2s;
+  cursor: pointer;
+}
+
+.mypage-link:hover {
+  color: var(--color-primary);
+}
+
+.mypage-logout-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-primary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.2s;
+}
+
+.mypage-logout-btn:hover {
+  opacity: 0.7;
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .mypage-dropdown {
+    position: fixed;
+    top: auto;
+    right: 8px;
+    left: 8px;
+    width: auto;
+    margin-top: 60px;
+  }
+}
+

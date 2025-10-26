@@ -4,15 +4,20 @@
   border-bottom: 1px solid #e5e7eb;
   padding: var(--space-sm) var(--space-md);
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  z-index: 1;
 }
 
 .post-card:hover {
-  background: var(--color-background-secondary);
+  transform: translate(-2px, -2px);
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
 }
 
 .post-card:active {
-  background: var(--color-background-tertiary);
+  transform: translate(-1px, -1px);
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .post-card-content {
@@ -51,6 +56,7 @@
 .post-card-title {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
+  margin-top: var(--space-xs);
   margin-bottom: var(--space-xs);
   display: -webkit-box;
   -webkit-line-clamp: 1;
