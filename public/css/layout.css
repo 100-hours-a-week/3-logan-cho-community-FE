@@ -22,31 +22,60 @@
 
 /* Header */
 .header {
-  background: var(--color-background);
-  border-bottom: 1px solid var(--color-border-light);
-  padding: var(--space-sm) 0;
-  padding-top: calc(var(--space-sm) + var(--safe-area-inset-top));
   position: sticky;
   top: 0;
   z-index: 100;
+  background: var(--color-background);
+  border-bottom: 1px solid var(--color-border);
+  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.95);
 }
 
 .header-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding-top: var(--space-md);
+  padding-bottom: var(--space-md);
 }
 
 .header-logo {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
   color: var(--color-primary);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.header-logo:hover {
+  opacity: 0.8;
 }
 
 .header-nav {
   display: flex;
-  gap: var(--space-md);
   align-items: center;
+  gap: var(--space-sm);
+}
+
+.nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  transition: all 0.2s;
+}
+
+.nav-icon-img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  filter: grayscale(1) brightness(0.5);
+  transition: filter 0.2s;
+}
+
+.nav-icon:hover .nav-icon-img {
+  filter: brightness(0) saturate(100%) invert(36%) sepia(91%) saturate(2676%) hue-rotate(207deg) brightness(101%) contrast(101%);
 }
 
 .nav-link {

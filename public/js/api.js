@@ -203,9 +203,10 @@ const api = {
   /**
    * Logout
    * DELETE /api/auth
+   * Uses credentials to properly delete HttpOnly refresh token cookie
    */
   async logout() {
-    return await this.delete("/api/auth")
+    return await this.requestWithCredentials("DELETE", "/api/auth")
   },
 
   // ==================== Post API ====================
@@ -465,7 +466,7 @@ async checkEmailDuplicate(email) {
       headers: {
         Authorization: `Bearer ${storage.getToken()}`,
       },
-      credentials: "same-origin", // Store cookie but don't send it
+      credentials: "include", // 크로스 사이트 허용
     })
 
     if (!response.ok) {

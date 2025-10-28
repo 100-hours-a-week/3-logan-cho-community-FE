@@ -3,8 +3,9 @@ import { storage } from "/js/storage.js"
 import { dom } from "/js/dom.js"
 import { cdn } from "/js/cdn.js"
 
-// Redirect if not logged in
-if (!storage.hasToken()) {
+// Redirect if not logged in (only if on mypage.html)
+const isMyPageRoute = window.location.pathname.includes("/mypage")
+if (!storage.hasToken() && isMyPageRoute) {
   window.location.href = "/login"
 }
 
@@ -154,22 +155,58 @@ function closeNicknameModalFunc() {
   dom.qs("#nickname-error").textContent = ""
 }
 
-nicknameForm.addEventListener("submit", async (e) => {
+// Nickname validation
+function validateNickname(value) {
+  if (!value || !value.trim()) {
+    return { valid: false, message: "닉네임을 입력해주세요" }
+  }
+  const trimmedValue = value.trim()
+  if (trimmedValue.length < 2) {
+    return { valid: false, message: "닉네임은 2자 이상이어야 합니다" }
+  }
+  if (trimmedValue.length > 12) {
+    return { valid: false, message: "닉네임은 12자 이하여야 합니다" }
+  }
+  return { valid: true, message: "" }
+}
+
+// Real-time validation on blur
+nicknameInput?.addEventListener("blur", () => {
+  const errorElement = dom.qs("#nickname-error")
+  if (!errorElement) return
+  
+  const result = validateNickname(nicknameInput.value)
+  errorElement.textContent = result.message
+  
+  if (result.valid) {
+    nicknameInput.classList.remove("invalid")
+    nicknameInput.classList.add("valid")
+  } else {
+    nicknameInput.classList.remove("valid")
+    nicknameInput.classList.add("invalid")
+  }
+})
+
+// Clear validation on focus
+nicknameInput?.addEventListener("focus", () => {
+  const errorElement = dom.qs("#nickname-error")
+  if (errorElement) {
+    errorElement.textContent = ""
+  }
+  nicknameInput.classList.remove("valid", "invalid")
+})
+
+nicknameForm?.addEventListener("submit", async (e) => {
   e.preventDefault()
 
   const newNickname = nicknameInput.value.trim()
   const errorElement = dom.qs("#nickname-error")
 
-  // Clear errors
-  errorElement.textContent = ""
-
-  if (!newNickname) {
-    errorElement.textContent = "닉네임을 입력해주세요"
-    return
-  }
-
-  if (newNickname.length < 2 || newNickname.length > 20) {
-    errorElement.textContent = "닉네임은 2-20자 사이여야 합니다"
+  // Validate
+  const result = validateNickname(newNickname)
+  if (!result.valid) {
+    errorElement.textContent = result.message
+    nicknameInput.classList.add("invalid")
     return
   }
 
@@ -315,11 +352,27 @@ confirmDeleteBtn.addEventListener("click", async () => {
 })
 
 // Logout handler
-logoutBtn?.addEventListener("click", async () => {
-  if (!confirm("로그아웃 하시겠습니까?")) {
-    return
+logoutBtn?.addEventListener("click", () => {
+  const modal = dom.qs("#logout-modal")
+  if (modal) {
+    modal.style.display = "flex"
   }
+})
 
+// Logout modal handlers
+const closeLogoutModal = () => {
+  const modal = dom.qs("#logout-modal")
+  if (modal) {
+    modal.style.display = "none"
+  }
+}
+
+dom.qs("#close-logout-modal")?.addEventListener("click", closeLogoutModal)
+dom.qs("#cancel-logout-btn")?.addEventListener("click", closeLogoutModal)
+
+dom.qs("#confirm-logout-btn")?.addEventListener("click", async () => {
+  closeLogoutModal()
+  
   const spinner = dom.showSpinner()
 
   try {
@@ -339,5 +392,14 @@ logoutBtn?.addEventListener("click", async () => {
   }
 })
 
-// Initialize
-loadProfile()
+// Close modal on overlay click
+dom.qs("#logout-modal")?.addEventListener("click", (e) => {
+  if (e.target.id === "logout-modal") {
+    closeLogoutModal()
+  }
+})
+
+// Initialize - only load if elements exist
+if (profileImage && profileName) {
+  loadProfile()
+}

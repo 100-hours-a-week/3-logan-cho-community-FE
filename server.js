@@ -21,12 +21,14 @@ app.get("/signup", (req, res) => {
   res.sendFile(path.join(__dirname, "public/pages/auth/signup/signup.html"))
 })
 
-app.get("/board", (req, res) => {
-  res.sendFile(path.join(__dirname, "public/pages/board/board.html"))
-})
-
 app.get("/board/detail", (req, res) => {
   res.sendFile(path.join(__dirname, "public/pages/board/postDetail.html"))
+})
+
+app.get("/board", (req, res) => {
+  console.log("📍 Board route - Full URL:", req.url)
+  console.log("📍 Board route - Query:", req.query)
+  res.sendFile(path.join(__dirname, "public/pages/board/board.html"))
 })
 
 app.get("/mypage", (req, res) => {

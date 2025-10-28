@@ -11,16 +11,30 @@ export const cdn = {
   _cookieReady: false,
   _issuingPromise: null,
 
+  
   getUrl(cdnBaseUrl, objectKey) {
     if (!cdnBaseUrl) throw new Error("cdnBaseUrl is required")
-    // 중복 슬래시 방지(경로 구조는 유지)
+  
+    // 이미 절대 URL(http 또는 https)인 경우 그대로 사용
+    if (/^https?:\/\//i.test(cdnBaseUrl)) {
+      if (cdnBaseUrl.endsWith("/") && objectKey.startsWith("/")) {
+        return cdnBaseUrl + objectKey.slice(1)
+      }
+      if (!cdnBaseUrl.endsWith("/") && !objectKey.startsWith("/")) {
+        return `${cdnBaseUrl}/${objectKey}`
+      }
+      return cdnBaseUrl + objectKey
+    }
+  
+    // 상대경로일 때만 로컬 origin 붙이기
+    const base = window.location.origin
     if (cdnBaseUrl.endsWith("/") && objectKey.startsWith("/")) {
-      return cdnBaseUrl + objectKey.slice(1)
+      return base + cdnBaseUrl + objectKey.slice(1)
     }
     if (!cdnBaseUrl.endsWith("/") && !objectKey.startsWith("/")) {
-      return `${cdnBaseUrl}/${objectKey}`
+      return `${base}/${cdnBaseUrl}/${objectKey}`
     }
-    return cdnBaseUrl + objectKey
+    return base + cdnBaseUrl + objectKey
   },
 
   async _ensureCookieOnce() {
@@ -42,12 +56,18 @@ export const cdn = {
     const url = this.getUrl(cdnBaseUrl, objectKey)
 
     // 1차 시도
-    let res = await fetch(url, { credentials: "include" })
+    let res = await fetch(url, {
+        mode: "cors",               // CORS로 강제 설정
+        credentials: "include",     // 쿠키 전송 허용
+      })
 
     // 쿠키 없어서 접근 거부 시(보통 401/403), 딱 1회만 쿠키 발급 후 재시도
     if ((res.status === 401 || res.status === 403) && !this._cookieReady) {
       await this._ensureCookieOnce()
-      res = await fetch(url, { credentials: "include" })
+      res = await fetch(url, {
+        mode: "cors",               // CORS로 강제 설정
+        credentials: "include",     // 쿠키 전송 허용
+      })
     }
 
     if (!res.ok) {

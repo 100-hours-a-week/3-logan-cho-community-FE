@@ -78,7 +78,7 @@ const dom = {
         padding: 12px 24px;
         border-radius: 6px;
         box-shadow: var(--shadow-lg);
-        z-index: 1000;
+        z-index: 9999;
         animation: slideUp 0.3s ease;
       `,
       },

@@ -2,6 +2,15 @@ import { api } from "/js/api.js"
 import { dom } from "/js/dom.js"
 import { cdn } from "/js/cdn.js"
 
+// Debug: Log all link clicks
+document.addEventListener("click", (e) => {
+  if (e.target.tagName === "A" || e.target.closest("a")) {
+    const link = e.target.tagName === "A" ? e.target : e.target.closest("a")
+    console.log("🔗 [Home] Link clicked:", link.href)
+    console.log("🔗 [Home] Link text:", link.textContent)
+  }
+})
+
 async function loadPopularPosts() {
   const container = dom.qs("#popular-posts")
 
@@ -119,24 +128,22 @@ function createPostCard(post, cdnBaseUrl = "") {
         thumbnail.src = URL.createObjectURL(blob)
       } catch (error) {
         console.error("Failed to load thumbnail:", error)
-        // Show placeholder on error
-        const placeholder = dom.create("div", { className: "post-card-thumbnail-placeholder" }, ["📷"])
-        thumbnail.replaceWith(placeholder)
+        // Hide thumbnail on error
+        thumbnail.style.display = "none"
       }
-    })
+    }, { once: true })
     
     cardContent.appendChild(thumbnail)
   } else if (post.imageUrl) {
+    // Fallback to old imageUrl if present
     const thumbnail = dom.create("img", {
       src: post.imageUrl,
       alt: post.title,
       className: "post-card-thumbnail",
     })
     cardContent.appendChild(thumbnail)
-  } else {
-    const placeholder = dom.create("div", { className: "post-card-thumbnail-placeholder" }, ["📷"])
-    cardContent.appendChild(placeholder)
   }
+  // No placeholder - just don't show anything if no image
   
   card.appendChild(cardContent)
   

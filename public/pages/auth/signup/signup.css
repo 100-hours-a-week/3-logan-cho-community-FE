@@ -27,6 +27,15 @@
 .signup-form {
   display: flex;
   flex-direction: column;
+  gap: 0; /* gap 제거하고 form-group으로 제어 */
+}
+
+.form-group {
+  margin-bottom: 16px; /* 모든 input 간 일정한 간격 */
+}
+
+.form-group:last-of-type {
+  margin-bottom: var(--space-lg); /* 마지막 input과 버튼 사이 간격 */
 }
 
 .profile-upload {
@@ -88,4 +97,78 @@
 
 .form-helper.success {
   color: var(--color-success);
+}
+
+/* Fixed height for error messages to prevent layout shift */
+.form-error,
+.form-helper {
+  min-height: 18px;
+  font-size: var(--font-size-sm);
+  line-height: 18px;
+  margin: 0; /* 기본 margin 제거 */
+}
+
+.form-error {
+  margin-top: 4px;
+}
+
+.form-helper {
+  margin-top: 4px;
+  color: var(--color-text-tertiary);
+}
+
+/* 이메일 피드백 컨테이너 - 에러와 헬퍼가 같은 공간 사용 */
+.email-feedback {
+  position: relative;
+  min-height: 18px;
+  margin-top: 4px;
+}
+
+.email-feedback .form-error,
+.email-feedback .form-helper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  margin-top: 0;
+}
+
+.email-feedback .form-error {
+  z-index: 2;
+}
+
+.email-feedback .form-helper {
+  z-index: 1;
+}
+
+/* Form feedback container for password (error left, helper right) */
+.form-feedback {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-xs);
+  margin-top: 4px;
+  min-height: 18px;
+}
+
+.form-feedback .form-error {
+  margin-top: 0;
+  flex: 1;
+  text-align: left;
+}
+
+.form-feedback .form-helper {
+  margin-top: 0;
+  flex-shrink: 0;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Input validation states */
+.form-input.valid {
+  border-color: var(--color-success);
+}
+
+.form-input.invalid {
+  border-color: var(--color-error);
 }

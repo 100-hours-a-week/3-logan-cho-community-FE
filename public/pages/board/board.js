@@ -2,7 +2,14 @@ import { api } from "/js/api.js"
 import { dom } from "/js/dom.js"
 import { cdn } from "/js/cdn.js"
 
-let currentStrategy = "POPULAR"
+// Initialize strategy from URL parameter
+console.log("🌐 [Board] Full URL:", window.location.href)
+console.log("🌐 [Board] Search params:", window.location.search)
+const urlParams = new URLSearchParams(window.location.search)
+const tabParam = urlParams.get("tab")
+console.log("🌐 [Board] Tab param:", tabParam)
+let currentStrategy = tabParam === "free" ? "RECENT" : "POPULAR"
+console.log("🌐 [Board] Initial strategy:", currentStrategy)
 let nextCursor = null
 let hasNext = true
 let isLoading = false
@@ -41,6 +48,24 @@ dom.qsa(".tab-btn").forEach((btn) => {
     loadPosts()
   })
 })
+
+// Initialize active tab based on URL parameter on page load
+function initializeActiveTab() {
+  const activeTab = tabParam === "free" ? "free" : "popular"
+  dom.qsa(".tab-btn").forEach((btn) => {
+    if (btn.dataset.tab === activeTab) {
+      btn.classList.add("active")
+      currentStrategy = activeTab === "free" ? "RECENT" : "POPULAR"
+    } else {
+      btn.classList.remove("active")
+    }
+  })
+  resetPosts()
+  loadPosts()
+}
+
+// Run initialization
+initializeActiveTab()
 
 // Search
 searchBtn.addEventListener("click", handleSearch)
@@ -183,24 +208,22 @@ function createPostCard(post, cdnBaseUrl = "") {
         thumbnail.src = URL.createObjectURL(blob)
       } catch (error) {
         console.error("Failed to load thumbnail:", error)
-        // Show placeholder on error
-        const placeholder = dom.create("div", { className: "post-card-thumbnail-placeholder" }, ["📷"])
-        thumbnail.replaceWith(placeholder)
+        // Hide thumbnail on error
+        thumbnail.style.display = "none"
       }
-    })
+    }, { once: true })
     
     cardContent.appendChild(thumbnail)
   } else if (post.imageUrl) {
+    // Fallback to old imageUrl if present
     const thumbnail = dom.create("img", {
       src: post.imageUrl,
       alt: post.title,
       className: "post-card-thumbnail",
     })
     cardContent.appendChild(thumbnail)
-  } else {
-    const placeholder = dom.create("div", { className: "post-card-thumbnail-placeholder" }, ["📷"])
-    cardContent.appendChild(placeholder)
   }
+  // No placeholder - just don't show anything if no image
   
   card.appendChild(cardContent)
   
@@ -320,36 +343,31 @@ function updateImagePreviews() {
   selectedImages.forEach((file, index) => {
     const reader = new FileReader()
     reader.onload = (e) => {
-      const previewItem = dom.create("div", { className: "image-preview-item" })
+      const previewItem = dom.create("div", { className: "image-preview-item" }, [
+        dom.create("img", { src: e.target.result, alt: `이미지 ${index + 1}` }),
+        dom.create("button", { 
+          type: "button", 
+          className: "remove-image-btn",
+          "data-index": index
+        }, ["×"])
+      ])
       
-      const img = dom.create("img", {
-        src: e.target.result,
-        alt: "Preview"
-      })
-      
-      const removeBtn = dom.create("button", {
-        className: "remove-btn",
-        type: "button"
-      }, ["×"])
-      
-      removeBtn.addEventListener("click", () => {
-        selectedImages.splice(index, 1)
-        updateImagePreviews()
-      })
-      
-      previewItem.appendChild(img)
-      previewItem.appendChild(removeBtn)
       imagePreviewContainer.appendChild(previewItem)
     }
     reader.readAsDataURL(file)
   })
-  
-  // Show placeholder if no images
-  if (selectedImages.length === 0) {
-    const placeholder = dom.create("div", { className: "image-preview-placeholder" }, ["📷"])
-    imagePreviewContainer.appendChild(placeholder)
-  }
 }
+
+// Handle image removal with event delegation
+imagePreviewContainer?.addEventListener("click", (e) => {
+  if (e.target.classList.contains("remove-image-btn")) {
+    const index = parseInt(e.target.dataset.index)
+    selectedImages.splice(index, 1)
+    updateImagePreviews()
+    // Reset file input
+    imageInput.value = ""
+  }
+})
 
 // Handle form submission
 createPostForm.addEventListener("submit", async (e) => {
@@ -386,10 +404,20 @@ createPostForm.addEventListener("submit", async (e) => {
     
     // Upload images if any
     if (selectedImages.length > 0) {
-      for (const file of selectedImages) {
-        const presignedData = await api.getPostPresignedUrl(file.name, file.type)
-        await api.uploadToS3(file, presignedData.presignedUrl)
-        imageObjectKeys.push(presignedData.objectKey)
+      // Prepare file metadata
+      const files = selectedImages.map((file) => ({
+        fileName: file.name,
+        mimeType: file.type,
+      }))
+
+      // Get presigned URLs for all files
+      const presignedData = await api.getPostPresignedUrls(files)
+      const urls = presignedData.urls || []
+
+      // Upload images to S3
+      for (let i = 0; i < selectedImages.length; i++) {
+        await api.uploadToS3(selectedImages[i], urls[i].presignedUrl)
+        imageObjectKeys.push(urls[i].objectKey)
       }
     }
     

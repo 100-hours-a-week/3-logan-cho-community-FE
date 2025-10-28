@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="/css/theme.css" />
     <link rel="stylesheet" href="/css/layout.css" />
     <link rel="stylesheet" href="/pages/board/postDetail.css" />
+    <link rel="stylesheet" href="/pages/mypage/mypage.css" />
   </head>
   <body>
     <div class="page-wrapper">
@@ -21,8 +22,8 @@
             <div class="post-header-top">
               <h1 id="post-title" class="post-title"></h1>
               <div id="post-actions" class="post-actions" style="display: none;">
-                <button class="btn btn-outline btn-sm" id="edit-post-btn">수정</button>
-                <button class="btn btn-danger btn-sm" id="delete-post-btn">삭제</button>
+                <button class="btn-sm btn-edit" id="edit-post-btn">수정</button>
+                <button class="btn-sm btn-delete" id="delete-post-btn">삭제</button>
               </div>
             </div>
             <div class="post-meta-info">
@@ -92,6 +93,74 @@
           </div>
         </div>
       </main>
+    </div>
+
+    <!-- Edit Post Modal -->
+    <div class="modal-overlay" id="edit-post-modal" style="display: none;">
+      <div class="modal create-post-modal">
+        <div class="modal-header">
+          <h3 class="modal-title">게시물 수정</h3>
+          <button class="modal-close" id="close-edit-post-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="edit-post-form">
+            <div class="form-group">
+              <label for="edit-post-title" class="form-label">제목</label>
+              <input 
+                type="text" 
+                id="edit-post-title" 
+                class="form-input" 
+                placeholder="제목을 입력하세요"
+                required
+                maxlength="100"
+              >
+              <div class="form-error" id="edit-title-error"></div>
+            </div>
+
+            <div class="form-group">
+              <label for="edit-post-content" class="form-label">내용</label>
+              <textarea 
+                id="edit-post-content" 
+                class="form-textarea" 
+                placeholder="내용을 입력하세요"
+                required
+                maxlength="2000"
+                rows="6"
+              ></textarea>
+              <div class="form-helper">
+                <span id="edit-content-char-count">0</span> / 2000
+              </div>
+              <div class="form-error" id="edit-content-error"></div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">이미지 (최대 3장)</label>
+              <input 
+                type="file" 
+                id="edit-image-input" 
+                accept="image/*" 
+                multiple 
+                hidden
+              >
+              <button 
+                type="button" 
+                id="select-edit-images-btn" 
+                class="btn btn-outline"
+              >
+                이미지 선택
+              </button>
+              <div class="form-helper">JPG, PNG, GIF (최대 5MB)</div>
+              <div id="edit-image-preview-container" class="image-preview-container"></div>
+              <div class="form-error" id="edit-image-error"></div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" id="cancel-edit-post-btn">취소</button>
+              <button type="submit" class="btn btn-primary">수정</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
 
     <script type="module" src="/js/common.js"></script>

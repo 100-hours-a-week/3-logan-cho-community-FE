@@ -36,15 +36,19 @@
 
             <!-- Name -->
             <div class="form-group">
-              <label for="name" class="form-label">이름</label>
+              <label for="name" class="form-label">닉네임</label>
               <input 
                 type="text" 
                 id="name" 
                 class="form-input" 
-                placeholder="이름을 입력하세요"
+                placeholder="닉네임을 입력하세요"
                 required
+                maxlength="12"
               >
-              <div class="form-error" id="name-error"></div>
+              <div class="form-feedback">
+                <div class="form-error" id="name-error"></div>
+                <div class="form-helper" id="name-helper">2~12자</div>
+              </div>
             </div>
 
             <!-- Email -->
@@ -60,8 +64,10 @@
                 >
                 <button type="button" class="btn btn-outline" id="check-email-btn">중복검사</button>
               </div>
-              <div class="form-error" id="email-error"></div>
-              <div class="form-helper" id="email-helper"></div>
+              <div class="email-feedback">
+                <div class="form-error" id="email-error"></div>
+                <div class="form-helper" id="email-helper"></div>
+              </div>
             </div>
 
             <!-- Password -->
@@ -74,8 +80,10 @@
                 placeholder="비밀번호를 입력하세요"
                 required
               >
-              <div class="form-error" id="password-error"></div>
-              <div class="form-helper">8자 이상, 영문/숫자/특수문자 포함</div>
+              <div class="form-feedback">
+                <div class="form-error" id="password-error"></div>
+                <div class="form-helper" id="password-helper">8자 이상, 영문/숫자/특수문자 포함</div>
+              </div>
             </div>
 
             <!-- Password Confirm -->
