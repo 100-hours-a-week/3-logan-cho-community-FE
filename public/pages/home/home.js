@@ -98,16 +98,6 @@ function createPostCard(post, cdnBaseUrl = "") {
   likeWrap.appendChild(dom.create("span", {}, [String(post.like?.count ?? 0)]))
   metaRow.appendChild(likeWrap)
 
-  // comments (fallback 0 when not provided)
-  const commentWrap = dom.create("span", { className: "post-card-meta-item" })
-  commentWrap.appendChild(dom.create("img", {
-    src: "/comment.png",
-    alt: "comments",
-    className: "post-card-icon",
-  }))
-  commentWrap.appendChild(dom.create("span", {}, [String(post.commentCount ?? 0)]))
-  metaRow.appendChild(commentWrap)
-
   mainContent.appendChild(metaRow)
   
   cardContent.appendChild(mainContent)
