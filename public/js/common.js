@@ -12,7 +12,7 @@ import { config } from "./config.js"
 
 function isAuthPage() {
   const path = window.location.pathname
-  return path === "/login" || path === "/signup"
+  return path === "/login" || path === "/signup" || path === "/recover"
 }
 
 // Inject header

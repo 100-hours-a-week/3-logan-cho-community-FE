@@ -5,10 +5,22 @@ const form = dom.qs("#signup-form")
 const profileImageInput = dom.qs("#profile-image")
 const profilePreview = dom.qs("#profile-preview")
 const uploadBtn = dom.qs("#upload-btn")
-const checkEmailBtn = dom.qs("#check-email-btn")
+const sendCodeBtn = dom.qs("#send-code-btn")
+const verifyCodeBtn = dom.qs("#verify-code-btn")
+const verificationGroup = dom.qs("#verification-group")
+const recoverModalOverlay = dom.qs("#recover-modal-overlay")
+const recoverYesBtn = dom.qs("#recover-yes-btn")
+const recoverNoBtn = dom.qs("#recover-no-btn")
 
 let selectedFile = null
-let emailChecked = false
+let emailVerified = false
+let emailVerifiedToken = null
+let isLeavedMember = false
+let currentEmail = ""
+
+// Verification code input and button are disabled by default
+console.log("🔍 Verification group element:", verificationGroup)
+console.log("✅ Verification inputs are disabled initially")
 
 // Validation functions
 const validators = {
@@ -120,8 +132,8 @@ profileImageInput.addEventListener("change", (e) => {
   reader.readAsDataURL(file)
 })
 
-// Handle email duplicate check
-checkEmailBtn.addEventListener("click", async () => {
+// Handle send verification code
+sendCodeBtn.addEventListener("click", async () => {
   const email = dom.qs("#email").value.trim()
   const emailError = dom.qs("#email-error")
   const emailHelper = dom.qs("#email-helper")
@@ -141,26 +153,169 @@ checkEmailBtn.addEventListener("click", async () => {
     return
   }
 
+  currentEmail = email
+  const spinner = dom.showSpinner()
+
   try {
-    // Call API to check email duplication
-    const result = await api.checkEmailDuplicate(email)
+    // Call API to send verification code
+    const response = await api.sendSignupEmailCode(email)
     
-    // If result is true or the API returns success, email is available
-    emailHelper.textContent = "사용 가능한 이메일입니다"
+    isLeavedMember = response.isLeavedMember || false
+    
+    if (isLeavedMember) {
+      console.log("⚠️ This is a deleted member account. Show recovery modal.")
+      dom.hideSpinner(spinner)
+      
+      // Show recover modal
+      recoverModalOverlay.style.display = "flex"
+      return
+    }
+    
+    emailHelper.textContent = "인증 코드가 전송되었습니다"
     emailHelper.classList.add("success")
-    emailChecked = true
+    
+    // Enable verification code input and button
+    console.log("🔍 Enabling verification inputs...")
+    const verificationCodeInput = dom.qs("#verification-code")
+    if (verificationCodeInput) {
+      verificationCodeInput.disabled = false
+      console.log("✅ Verification code input enabled")
+    }
+    if (verifyCodeBtn) {
+      verifyCodeBtn.disabled = false
+      console.log("✅ Verify button enabled")
+    }
+    
+    // Disable email input and send button
+    dom.qs("#email").disabled = true
+    sendCodeBtn.disabled = true
+    
+    dom.showToast("인증 코드가 이메일로 전송되었습니다")
   } catch (error) {
-    emailError.textContent = "이미 사용 중인 이메일입니다"
-    emailChecked = false
+    emailError.textContent = error.message || "인증 코드 전송에 실패했습니다"
+    dom.showToast(error.message || "인증 코드 전송에 실패했습니다", "error")
+  } finally {
+    dom.hideSpinner(spinner)
   }
 })
 
-// Reset email check when email changes
+// Handle verify code
+verifyCodeBtn.addEventListener("click", async () => {
+  const email = dom.qs("#email").value.trim()
+  const code = dom.qs("#verification-code").value.trim()
+  const verificationError = dom.qs("#verification-error")
+  const verificationHelper = dom.qs("#verification-helper")
+
+  verificationError.textContent = ""
+  verificationHelper.textContent = ""
+
+  if (!code) {
+    verificationError.textContent = "인증 코드를 입력해주세요"
+    return
+  }
+
+  const spinner = dom.showSpinner()
+
+  try {
+    // Call API to verify code
+    const response = await api.verifySignupEmailCode(email, code)
+    
+    emailVerifiedToken = response.emailVerifiedToken
+    emailVerified = true
+    
+    verificationHelper.textContent = "이메일 인증이 완료되었습니다"
+    verificationHelper.classList.add("success")
+    
+    // Disable verification inputs after successful verification
+    const verificationCodeInput = dom.qs("#verification-code")
+    if (verificationCodeInput) {
+      verificationCodeInput.disabled = true
+    }
+    if (verifyCodeBtn) {
+      verifyCodeBtn.disabled = true
+    }
+    
+    dom.showToast("이메일 인증이 완료되었습니다")
+  } catch (error) {
+    verificationError.textContent = error.message || "인증 코드가 올바르지 않습니다"
+    emailVerified = false
+    emailVerifiedToken = null
+    dom.showToast(error.message || "인증 코드 검증에 실패했습니다", "error")
+  } finally {
+    dom.hideSpinner(spinner)
+  }
+})
+
+// Handle recover modal - Yes button (go to recover page)
+recoverYesBtn.addEventListener("click", () => {
+  window.location.href = `/recover?email=${encodeURIComponent(currentEmail)}`
+})
+
+// Handle recover modal - No button (resend code as normal signup)
+recoverNoBtn.addEventListener("click", async () => {
+  // Hide modal
+  recoverModalOverlay.style.display = "none"
+  
+  const spinner = dom.showSpinner()
+  const emailError = dom.qs("#email-error")
+  const emailHelper = dom.qs("#email-helper")
+  
+  try {
+    // Resend code without leaved member check
+    await api.resendSignupEmailCode(currentEmail)
+    
+    emailHelper.textContent = "인증 코드가 전송되었습니다"
+    emailHelper.classList.add("success")
+    
+    // Enable verification code input and button
+    const verificationCodeInput = dom.qs("#verification-code")
+    if (verificationCodeInput) {
+      verificationCodeInput.disabled = false
+    }
+    if (verifyCodeBtn) {
+      verifyCodeBtn.disabled = false
+    }
+    
+    // Disable email input and send button
+    dom.qs("#email").disabled = true
+    sendCodeBtn.disabled = true
+    
+    dom.showToast("인증 코드가 이메일로 전송되었습니다")
+  } catch (error) {
+    emailError.textContent = error.message || "인증 코드 전송에 실패했습니다"
+    dom.showToast(error.message || "인증 코드 전송에 실패했습니다", "error")
+  } finally {
+    dom.hideSpinner(spinner)
+  }
+})
+
+// Reset verification when email changes
 dom.qs("#email").addEventListener("input", () => {
-  emailChecked = false
+  emailVerified = false
+  emailVerifiedToken = null
+  isLeavedMember = false
+  currentEmail = ""
+  
   const emailHelper = dom.qs("#email-helper")
   emailHelper.textContent = ""
   emailHelper.classList.remove("success")
+  
+  // Reset and disable verification inputs
+  const verificationCodeInput = dom.qs("#verification-code")
+  if (verificationCodeInput) {
+    verificationCodeInput.value = ""
+    verificationCodeInput.disabled = true
+  }
+  dom.qs("#verification-error").textContent = ""
+  dom.qs("#verification-helper").textContent = ""
+  dom.qs("#verification-helper").classList.remove("success")
+  if (verifyCodeBtn) {
+    verifyCodeBtn.disabled = true
+  }
+  
+  // Re-enable email input and send button
+  dom.qs("#email").disabled = false
+  sendCodeBtn.disabled = false
   
   // Clear validation state on input
   const emailInput = dom.qs("#email")
@@ -216,14 +371,14 @@ form.addEventListener("submit", async (e) => {
   const isPasswordValid = validateField("password", validators.password)
   const isPasswordConfirmValid = validateField("password-confirm", validators.passwordConfirm, password)
 
-  // Check email duplicate validation
-  if (isEmailValid && !emailChecked) {
-    dom.qs("#email-error").textContent = "이메일 중복검사를 해주세요"
+  // Check email verification
+  if (isEmailValid && !emailVerified) {
+    dom.qs("#email-error").textContent = "이메일 인증을 완료해주세요"
     dom.qs("#email").classList.add("invalid")
   }
 
   // Stop if any validation failed
-  if (!isNameValid || !isEmailValid || !emailChecked || !isPasswordValid || !isPasswordConfirmValid) {
+  if (!isNameValid || !isEmailValid || !emailVerified || !isPasswordValid || !isPasswordConfirmValid) {
     return
   }
 
@@ -253,6 +408,7 @@ form.addEventListener("submit", async (e) => {
       password,
       name,
       imageObjectKey,
+      emailVerifiedToken,
     })
 
     dom.showToast("회원가입이 완료되었습니다!")

@@ -363,6 +363,63 @@ const api = {
     return await this.delete(`/api/posts/comments/${commentId}`)
   },
 
+  // ==================== Email API ====================
+
+  /**
+   * [첫 요청] 회원가입용 이메일 인증 코드 전송 (탈퇴회원 검증 O)
+   * POST /api/auth/signup/email-verification-code
+   * @param {string} email
+   * @returns {Promise<{ isLeavedMember: boolean }>}
+   */
+  async sendSignupEmailCode(email) {
+    return await this.post("/api/auth/signup/email-verification-code", { email }, { skipAuth: true })
+  },
+
+  /**
+   * [재 요청] 회원가입용 이메일 인증 코드 재요청 (탈퇴회원 검증 X)
+   * POST /api/auth/signup/email-verification-code/retry
+   * @param {string} email
+   * @returns {Promise<void>}
+   */
+    async resendSignupEmailCode(email) {
+      return await this.post("/api/auth/signup/email-verification-code/retry", { email }, { skipAuth: true })
+    },
+
+  /**
+   * 회원가입용 이메일 인증 코드 검증
+   * PUT /api/auth/signup/email-verification-code
+   * @param {string} email
+   * @param {string} code
+   * @returns {Promise<{ emailVerifiedToken: string }>}
+   */
+  async verifySignupEmailCode(email, code) {
+    return await this.put("/api/auth/signup/email-verification-code", { email, code }, { skipAuth: true })
+  },
+
+  /**
+   * 회원 복구용 이메일 인증 코드 전송
+   * POST /api/auth/recover/email-verification-code
+   * @param {string} email
+   * @returns {Promise<{ isLeavedMember: boolean }>}
+   */
+  async sendRecoverEmailCode(email) {
+    return await this.post("/api/auth/recover/email-verification-code", { email }, { skipAuth: true })
+  },
+
+  /**
+   * 회원 복구용 이메일 인증 코드 검증
+   * PUT /api/auth/recover/email-verification-code
+   * @param {string} email
+   * @param {string} code
+   * @returns {Promise<{ emailVerifiedToken: string }>}
+   */
+  async verifyRecoverEmailCode(email, code) {
+    return await this.put("/api/auth/recover/email-verification-code", { email, code }, { skipAuth: true })
+  },
+
+
+
+  
   // ==================== Member API ====================
 
   /**
@@ -378,21 +435,21 @@ const api = {
   /**
    * Register (Sign up)
    * POST /api/members
-   * @param {Object} data - { email, password, name, imageObjectKey }
+   * @param {Object} data - { email, password, name, imageObjectKey, emailVerifiedToken }
    */
   async register(data) {
     return await this.post("/api/members", data, { skipAuth: true })
   },
 
   /**
- * Check email duplication
- * POST /api/auth/check-email
- * @param {string} email
- * @returns {Promise<boolean>} - true if available, false if duplicate
- */
-async checkEmailDuplicate(email) {
-  return await this.post("/api/auth/check-email", { email }, { skipAuth: true })
-},
+   * Check email duplication
+   * POST /api/auth/check-email
+   * @param {string} email
+   * @returns {Promise<boolean>} - true if available, false if duplicate
+   */
+  async checkEmailDuplicate(email) {
+    return await this.post("/api/auth/check-email", { email }, { skipAuth: true })
+  },
 
   /**
    * Delete account
@@ -400,6 +457,17 @@ async checkEmailDuplicate(email) {
    */
   async deleteAccount() {
     return await this.delete("/api/members")
+  },
+
+  /**
+   * Recover deleted member
+   * POST /api/members/recover
+   * @param {string} email
+   * @param {string} newPassword
+   * @param {string} verificationCode
+   */
+  async recoverMember(email, newPassword, verificationCode) {
+    return await this.post("/api/members/recover", { email, newPassword, verificationCode }, { skipAuth: true })
   },
 
   /**

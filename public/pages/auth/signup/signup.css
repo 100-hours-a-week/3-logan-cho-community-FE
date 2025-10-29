@@ -77,6 +77,14 @@
   padding: var(--space-sm);
 }
 
+.input-with-button .btn-compact {
+  padding: 8px 16px;
+  height: auto;
+  min-height: 36px;
+  width: 85px;
+  text-align: center;
+}
+
 .signup-footer {
   text-align: center;
   margin-top: var(--space-md);
@@ -95,7 +103,8 @@
   text-decoration: underline;
 }
 
-.form-helper.success {
+.form-helper.success,
+#verification-helper.success {
   color: var(--color-success);
 }
 
@@ -171,4 +180,51 @@
 
 .form-input.invalid {
   border-color: var(--color-error);
+}
+
+/* Recover Member Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.modal-container {
+  background: white;
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  max-width: 400px;
+  width: 90%;
+  box-shadow: var(--shadow-lg);
+}
+
+.modal-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-sm);
+  text-align: center;
+}
+
+.modal-message {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-lg);
+  text-align: center;
+  line-height: 1.5;
+}
+
+.modal-actions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+}
+
+.modal-actions .btn {
+  flex: 1;
 }
