@@ -15,6 +15,36 @@
   display: none;
 }
 
+.mypage-dropdown-header {
+  position: relative;
+  padding: var(--space-xs) var(--space-sm);
+  padding-bottom: var(--space-xs);
+  text-align: right;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.mypage-dropdown-close {
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  padding: 2px 6px;
+  line-height: 1;
+  transition: all 0.2s;
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mypage-dropdown-close:hover {
+  color: var(--color-text-primary);
+  background: var(--color-background-secondary);
+}
+
 .mypage-dropdown.active {
   display: block;
 }

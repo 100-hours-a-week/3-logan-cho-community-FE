@@ -241,6 +241,9 @@ function injectMypageModals() {
 // Inject MyPage Dropdown
 function injectMypageDropdown(navContainer) {
   const dropdown = dom.create("div", { className: "mypage-dropdown", id: "mypage-dropdown" }, [
+    dom.create("div", { className: "mypage-dropdown-header" }, [
+      dom.create("button", { className: "mypage-dropdown-close", id: "mypage-dropdown-close" }, ["×"])
+    ]),
     dom.create("div", { className: "mypage-dropdown-content" }, [
       // Profile Section
       dom.create("div", { className: "mypage-profile" }, [
@@ -313,9 +316,40 @@ function injectMypageDropdown(navContainer) {
     dropdown.classList.toggle("active")
   })
   
-  // Close dropdown when clicking outside
+  // Close dropdown when clicking X button
+  const dropdownCloseBtn = dom.qs("#mypage-dropdown-close")
+  dropdownCloseBtn?.addEventListener("click", (e) => {
+    e.stopPropagation()
+    dropdown.classList.remove("active")
+  })
+  
+  // Close dropdown when clicking outside (but not when modals are open)
   document.addEventListener("click", (e) => {
-    if (!dropdown.contains(e.target) && !mypageBtn?.contains(e.target)) {
+    const target = e.target
+    
+    // Check if click is on a modal or modal button
+    const isModalElement = target instanceof Element && (
+      target.closest(".modal-overlay") || 
+      target.closest(".modal") ||
+      target.closest(".modal-close") ||
+      target.closest(".btn-secondary") ||
+      target.closest(".btn-primary") ||
+      target.closest(".btn-danger")
+    )
+    
+    // Check if any modal is open
+    const modals = ["nickname-modal", "password-modal", "delete-modal", "logout-modal"]
+    const isModalOpen = modals.some(modalId => {
+      const modal = dom.qs(`#${modalId}`)
+      return modal && modal.style.display !== "none" && modal.style.display !== ""
+    })
+    
+    // Don't close dropdown if clicking on modal elements or if modal is open
+    if (isModalElement || isModalOpen) {
+      return
+    }
+    
+    if (!dropdown.contains(target) && !mypageBtn?.contains(target)) {
       dropdown.classList.remove("active")
     }
   })
