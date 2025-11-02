@@ -211,11 +211,31 @@ function injectMypageModals() {
     ])
   ])
   
+  // Delete Comment Modal
+  const deleteCommentModal = dom.create("div", { className: "modal-overlay", id: "delete-comment-modal", style: "display: none;" }, [
+    dom.create("div", { className: "modal" }, [
+      dom.create("div", { className: "modal-header" }, [
+        dom.create("h3", { className: "modal-title" }, ["댓글 삭제"]),
+        dom.create("button", { className: "modal-close", id: "close-delete-comment-modal" }, ["×"])
+      ]),
+      dom.create("div", { className: "modal-body" }, [
+        dom.create("div", { className: "delete-warning" }, [
+          dom.create("p", { className: "warning-text" }, ["정말로 이 댓글을 삭제하시겠습니까?"])
+        ]),
+        dom.create("div", { className: "form-actions" }, [
+          dom.create("button", { type: "button", className: "btn btn-secondary", id: "cancel-delete-comment-btn" }, ["취소"]),
+          dom.create("button", { type: "button", className: "btn btn-danger", id: "confirm-delete-comment-btn" }, ["삭제"])
+        ])
+      ])
+    ])
+  ])
+  
   document.body.appendChild(nicknameModal)
   document.body.appendChild(passwordModal)
   document.body.appendChild(deleteModal)
   document.body.appendChild(logoutModal)
   document.body.appendChild(deletePostModal)
+  document.body.appendChild(deleteCommentModal)
 }
 
 // Inject MyPage Dropdown

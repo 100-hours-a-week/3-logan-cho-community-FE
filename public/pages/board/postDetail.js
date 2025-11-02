@@ -486,7 +486,7 @@ function renderComments(comments, cdnBaseUrl) {
 }
 
 function createCommentItem(comment, cdnBaseUrl) {
-  const item = dom.create("div", { className: "comment-item" })
+  const item = dom.create("div", { className: "comment-item", "data-comment-id": comment.commentId })
 
   const header = dom.create("div", { className: "comment-header" })
 
@@ -623,40 +623,159 @@ commentInput?.addEventListener("focus", (e) => {
   e.target.classList.add("expanded")
 })
 
-// Edit comment
-async function editComment(commentId, currentContent) {
-  const newContent = prompt("댓글 수정", currentContent)
+let currentEditingCommentId = null
+
+// Edit comment - inline editing
+function editComment(commentId, currentContent) {
+  // Cancel previous edit if any
+  if (currentEditingCommentId && currentEditingCommentId !== commentId) {
+    cancelEditComment()
+  }
   
-  if (newContent === null || newContent.trim() === "") {
+  currentEditingCommentId = commentId
+  
+  // Find the comment item
+  const commentItem = dom.qs(`[data-comment-id="${commentId}"]`)
+  if (!commentItem) return
+  
+  // Hide comment header
+  const headerElement = commentItem.querySelector(".comment-header")
+  if (headerElement) {
+    headerElement.style.display = "none"
+  }
+  
+  const contentElement = commentItem.querySelector(".comment-content")
+  if (!contentElement) return
+  
+  // Create edit form
+  const editForm = dom.create("div", { className: "comment-edit-form" })
+  
+  const textarea = dom.create("textarea", {
+    className: "comment-edit-input",
+    maxlength: "500",
+    rows: "3"
+  })
+  textarea.value = currentContent
+  
+  const editActions = dom.create("div", { className: "comment-edit-actions" })
+  
+  const cancelBtn = dom.create("button", {
+    type: "button",
+    className: "btn-comment-action edit",
+  }, ["취소"])
+  cancelBtn.addEventListener("click", () => cancelEditComment())
+  
+  const saveBtn = dom.create("button", {
+    type: "button",
+    className: "btn-comment-action",
+    style: "background: var(--color-primary); color: white; border-color: var(--color-primary);"
+  }, ["저장"])
+  saveBtn.addEventListener("click", () => saveEditComment(commentId))
+  
+  editActions.appendChild(cancelBtn)
+  editActions.appendChild(saveBtn)
+  
+  editForm.appendChild(textarea)
+  editForm.appendChild(editActions)
+  
+  // Replace content with edit form
+  contentElement.replaceWith(editForm)
+  
+  // Focus textarea
+  textarea.focus()
+  textarea.setSelectionRange(textarea.value.length, textarea.value.length)
+}
+
+// Cancel edit comment
+function cancelEditComment() {
+  if (!currentEditingCommentId) return
+  
+  const commentId = currentEditingCommentId
+  currentEditingCommentId = null
+  
+  // Reload comments to restore original view
+  loadComments()
+}
+
+// Restore comment header visibility (called when editing is cancelled or saved)
+function restoreCommentHeader(commentId) {
+  const commentItem = dom.qs(`[data-comment-id="${commentId}"]`)
+  if (commentItem) {
+    const headerElement = commentItem.querySelector(".comment-header")
+    if (headerElement) {
+      headerElement.style.display = ""
+    }
+  }
+}
+
+// Save edit comment
+async function saveEditComment(commentId) {
+  const commentItem = dom.qs(`[data-comment-id="${commentId}"]`)
+  if (!commentItem) return
+  
+  const textarea = commentItem.querySelector(".comment-edit-input")
+  if (!textarea) return
+  
+  const newContent = textarea.value.trim()
+  
+  if (!newContent) {
+    dom.showToast("댓글 내용을 입력해주세요", "error")
     return
   }
-
+  
+  if (newContent.length > 500) {
+    dom.showToast("댓글은 최대 500자까지 작성할 수 있습니다", "error")
+    return
+  }
+  
   const spinner = dom.showSpinner()
 
   try {
-    await api.updateComment(commentId, newContent.trim())
+    await api.updateComment(commentId, newContent)
     dom.showToast("댓글이 수정되었습니다")
     
+    currentEditingCommentId = null
     // Reload comments
     await loadComments()
   } catch (error) {
     console.error("Comment update error:", error)
     dom.showToast("댓글 수정에 실패했습니다", "error")
+    // Restore header if error
+    restoreCommentHeader(commentId)
   } finally {
     dom.hideSpinner(spinner)
   }
 }
 
-// Delete comment
-async function deleteComment(commentId) {
-  if (!confirm("정말로 이 댓글을 삭제하시겠습니까?")) {
-    return
+// Delete comment - using modal
+function deleteComment(commentId) {
+  currentEditingCommentId = commentId
+  
+  const modal = dom.qs("#delete-comment-modal")
+  if (modal) {
+    modal.style.display = "flex"
   }
+}
 
+// Delete comment modal handlers
+const closeDeleteCommentModal = () => {
+  const modal = dom.qs("#delete-comment-modal")
+  if (modal) {
+    modal.style.display = "none"
+    currentEditingCommentId = null
+  }
+}
+
+dom.qs("#close-delete-comment-modal")?.addEventListener("click", closeDeleteCommentModal)
+dom.qs("#cancel-delete-comment-btn")?.addEventListener("click", closeDeleteCommentModal)
+
+dom.qs("#confirm-delete-comment-btn")?.addEventListener("click", async () => {
+  closeDeleteCommentModal()
+  
   const spinner = dom.showSpinner()
 
   try {
-    await api.deleteComment(commentId)
+    await api.deleteComment(currentEditingCommentId)
     dom.showToast("댓글이 삭제되었습니다")
     
     // Reload comments
@@ -666,8 +785,16 @@ async function deleteComment(commentId) {
     dom.showToast("댓글 삭제에 실패했습니다", "error")
   } finally {
     dom.hideSpinner(spinner)
+    currentEditingCommentId = null
   }
-}
+})
+
+// Close delete comment modal on overlay click
+dom.qs("#delete-comment-modal")?.addEventListener("click", (e) => {
+  if (e.target.id === "delete-comment-modal") {
+    closeDeleteCommentModal()
+  }
+})
 
 function showError(title, message) {
   const container = dom.qs(".container")

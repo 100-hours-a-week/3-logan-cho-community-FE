@@ -396,6 +396,50 @@
   border-color: var(--color-error);
 }
 
+/* Comment inline edit form */
+.comment-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-top: var(--space-xs);
+}
+
+.comment-edit-input {
+  width: 100%;
+  padding: var(--space-sm);
+  border: 1px solid #e5e7eb;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  resize: vertical;
+  min-height: 40px;
+  line-height: 1.6;
+  transition: border-color 0.2s;
+}
+
+.comment-edit-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.comment-edit-actions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+}
+
+.comment-edit-actions .btn-comment-action {
+  padding: 4px 8px;
+  font-size: var(--font-size-xs);
+}
+
+.comment-edit-actions .btn-comment-action[style*="background: var(--color-primary)"]:hover {
+  background: var(--color-primary-hover) !important;
+  color: white !important;
+  border-color: var(--color-primary-hover) !important;
+}
+
 /* Empty state */
 .comments-empty {
   text-align: center;
