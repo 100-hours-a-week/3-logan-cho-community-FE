@@ -30,8 +30,6 @@ app.get("/board/detail", (req, res) => {
 })
 
 app.get("/board", (req, res) => {
-  console.log("📍 Board route - Full URL:", req.url)
-  console.log("📍 Board route - Query:", req.query)
   res.sendFile(path.join(__dirname, "public/pages/board/board.html"))
 })
 
@@ -39,7 +37,12 @@ app.get("/mypage", (req, res) => {
   res.sendFile(path.join(__dirname, "public/pages/mypage/mypage.html"))
 })
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`)
-  console.log(`📁 Serving static files from /public`)
-})
+// Only start server if not being required (for testing)
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running at http://localhost:${PORT}`)
+    console.log(`📁 Serving static files from /public`)
+  })
+}
+
+module.exports = app

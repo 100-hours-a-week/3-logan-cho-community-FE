@@ -1,0 +1,67 @@
+name: node CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '19'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+
+  build-and-push-ECR:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # OIDC에서 jwt 요청 시 필요
+      contents: read # action checkout 시 필요
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '19'
+
+      - name: Install dependencies
+        run: npm install
+
+      # AWS 인증 (OIDC 사용)
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }} # OIDC 연결 시 사용한 Role ARN Secret
+          aws-region: ap-northeast-2
+
+      # ECR 로그인
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Docker로 이미지 빌드 및 태그 지정
+      - name: Build, tag, and push backend image to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }} # 이전 action 출력 output에서 가져옴
+          ECR_REPOSITORY: millions/backend
+          IMAGE_TAG: ${{ github.sha }} #깃 커밋 고유 해시값 (언제 만들어졌는지 추적 가능)
+        run: |
+          # Dockerfile이 프로젝트 루트에 있다고 가정
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+
