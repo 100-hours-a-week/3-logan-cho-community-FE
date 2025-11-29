@@ -60,8 +60,62 @@ jobs:
           ECR_REPOSITORY: millions/frontend
           IMAGE_TAG: ${{ github.sha }} #깃 커밋 고유 해시값 (언제 만들어졌는지 추적 가능)
         run: |
-          # Dockerfile이 프로젝트 루트에 있다고 가정
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
+  
 
+
+
+
+
+
+# \ WebServer EC2 인스턴스에 SSH를 통해 ECR 이미지 배포
+  deploy:
+    needs: build-and-push-ECR
+    runs-on: ubuntu-latest
+    environment: production # 배포 환경 지정 (선택 사항)
+    
+    steps:
+      # SSH Action을 사용하여 원격 명령 실행
+      - name: Deploy via SSH and Docker
+        uses: appleboy/ssh-action@v1.0.3 # 가장 널리 사용되는 SSH 배포 Action
+        with:
+          host: ${{ secrets.EC2_PUBLIC_IP_WEB }} # WebServer 인스턴스의 공인 IP/DNS
+          username: ec2-user # Amazon Linux 기본 사용자
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }} # GitHub Secret에 저장된 Private Key
+          script: |
+            # ECR 변수 설정
+            REGION="ap-northeast-2"
+            ECR_ACCOUNT_ID="${{ secrets.AWS_ACCOUNT_ID }}" # 실제 AWS 계정 ID로 대체
+            ECR_REPOSITORY="millions/frontend"
+            IMAGE_TAG="${{ github.sha }}" # 빌드 단계에서 푸시한 해시 태그 사용
+
+            # ECR 로그인
+            echo "--- ECR Login ---"
+            # ECR_REGISTRY 주소 구성
+            ECR_REGISTRY="$ECR_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com"
+            
+            # WebServer EC2 인스턴스의 IAM Role을 사용하여 ECR에 Docker 로그인 (EC2한테 ECR Role 주기)
+            aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+
+            # ECR에서 pull
+            FULL_IMAGE="$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+            echo "--- Pulling $FULL_IMAGE ---"
+            docker pull $FULL_IMAGE
+            
+            # 기존 컨테이너 중지/제거 및 새 컨테이너 시작
+            echo "--- Docker Restart (Port 3000) ---"
+            CONTAINER_NAME="frontend-app" 
+            
+            # 기존 컨테이너 중지 및 제거 (오류 무시: || true)
+            docker stop $CONTAINER_NAME || true
+            docker rm $CONTAINER_NAME || true
+
+            # Node.js 앱 실행 (호스트 포트 3000 매핑)
+            docker run -d \
+              --name $CONTAINER_NAME \
+              -p 3000:3000 \
+              $FULL_IMAGE
+              
+            echo "Deployment of ${{ github.sha }} finished."
