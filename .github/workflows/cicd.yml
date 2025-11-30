@@ -74,16 +74,15 @@ jobs:
   deploy:
     needs: build-and-push-ECR
     runs-on: ubuntu-latest
-    environment: production # 배포 환경 지정 (선택 사항)
     
     steps:
       # SSH Action을 사용하여 원격 명령 실행
       - name: Deploy via SSH and Docker
-        uses: appleboy/ssh-action@v1.0.3 # 가장 널리 사용되는 SSH 배포 Action
+        uses: appleboy/ssh-action@v1.0.3 # 아래처럼 script 방식을 지원하여, bash -s 에 집어넣을 필요가 없음
         with:
-          host: ${{ secrets.EC2_PUBLIC_IP_WEB }} # WebServer 인스턴스의 공인 IP/DNS
-          username: ec2-user # Amazon Linux 기본 사용자
-          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }} # GitHub Secret에 저장된 Private Key
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }} # GitHub Secret에 저장된 Private Key
           script: |
             # ECR 변수 설정
             REGION="ap-northeast-2"
