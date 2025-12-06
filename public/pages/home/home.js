@@ -104,24 +104,21 @@ function createPostCard(post, cdnBaseUrl = "") {
   
   // Thumbnail (1:1 aspect ratio on the right)
   if (post.imageObjectKeys && post.imageObjectKeys.length > 0 && cdnBaseUrl) {
-    const thumbnailUrl = cdn.getUrl(cdnBaseUrl, post.imageObjectKeys[0])
     const thumbnail = dom.create("img", {
-      src: thumbnailUrl,
       alt: post.title,
       className: "post-card-thumbnail",
     })
     
-    // Handle image load error with signed cookie retry
-    thumbnail.addEventListener("error", async () => {
-      try {
-        const blob = await cdn.fetchImage(cdnBaseUrl, post.imageObjectKeys[0])
+    // Load image using signed cookie
+    cdn.fetchImage(cdnBaseUrl, post.imageObjectKeys[0])
+      .then((blob) => {
         thumbnail.src = URL.createObjectURL(blob)
-      } catch (error) {
+      })
+      .catch((error) => {
         console.error("Failed to load thumbnail:", error)
         // Hide thumbnail on error
         thumbnail.style.display = "none"
-      }
-    }, { once: true })
+      })
     
     cardContent.appendChild(thumbnail)
   } else if (post.imageUrl) {

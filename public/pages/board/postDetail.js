@@ -21,7 +21,7 @@ async function loadPostDetail() {
   try {
     currentPost = await api.getPostDetail(currentPostId)
 
-    renderPost(currentPost)
+    await renderPost(currentPost)
     
     // Load comments using API
     await loadComments()
@@ -33,7 +33,7 @@ async function loadPostDetail() {
   }
 }
 
-function renderPost(post) {
+async function renderPost(post) {
   // Title
   dom.qs("#post-title").textContent = post.title
 
@@ -48,19 +48,14 @@ function renderPost(post) {
     const avatarElement = dom.qs("#author-avatar")
     
     if (post.authorProfile.profileImageObjectKey) {
-      const avatarUrl = cdn.getUrl(cdnBaseUrl, post.authorProfile.profileImageObjectKey)
-      avatarElement.src = avatarUrl
-      
-      // Handle image load error with signed cookie retry
-      avatarElement.addEventListener("error", async () => {
-        try {
-          const blob = await cdn.fetchImage(cdnBaseUrl, post.authorProfile.profileImageObjectKey)
-          avatarElement.src = URL.createObjectURL(blob)
-        } catch (error) {
-          console.error("Failed to load author avatar:", error)
-          avatarElement.src = "/user-profile-illustration.png"
-        }
-      })
+      // Load image using signed cookie
+      try {
+        const blob = await cdn.fetchImage(cdnBaseUrl, post.authorProfile.profileImageObjectKey)
+        avatarElement.src = URL.createObjectURL(blob)
+      } catch (error) {
+        console.error("Failed to load author avatar:", error)
+        avatarElement.src = "/user-profile-illustration.png"
+      }
     } else {
       avatarElement.src = "/user-profile-illustration.png"
     }
@@ -82,27 +77,23 @@ function renderPost(post) {
     const cdnBaseUrl = post.cdnBaseUrl || ""
     imagesContainer.style.display = "block"
     
-    post.imageObjectKeys.forEach((key) => {
-      const imageUrl = cdn.getUrl(cdnBaseUrl, key)
+    // Load all images using signed cookie in order
+    for (const key of post.imageObjectKeys) {
       const img = dom.create("img", {
-        src: imageUrl,
         alt: "Post image",
         className: "post-image",
       })
       
-      // Handle image load error with signed cookie retry
-      img.addEventListener("error", async () => {
-        try {
-          const blob = await cdn.fetchImage(cdnBaseUrl, key)
-          img.src = URL.createObjectURL(blob)
-        } catch (error) {
-          console.error("Failed to load post image:", error)
-          img.style.display = "none"
-        }
-      }, { once: true })
+      try {
+        const blob = await cdn.fetchImage(cdnBaseUrl, key)
+        img.src = URL.createObjectURL(blob)
+      } catch (error) {
+        console.error("Failed to load post image:", error)
+        img.style.display = "none"
+      }
       
       imagesContainer.appendChild(img)
-    })
+    }
   } else {
     // Hide image container if no images
     imagesContainer.style.display = "none"
@@ -169,7 +160,7 @@ dom.qs("#like-btn")?.addEventListener("click", async () => {
 })
 
 // Edit post button
-dom.qs("#edit-post-btn")?.addEventListener("click", () => {
+dom.qs("#edit-post-btn")?.addEventListener("click", async () => {
   const modal = dom.qs("#edit-post-modal")
   if (modal && currentPost) {
     // Reset state
@@ -192,11 +183,18 @@ dom.qs("#edit-post-btn")?.addEventListener("click", () => {
     
     if (currentPost.imageObjectKeys && currentPost.imageObjectKeys.length > 0) {
       const cdnBaseUrl = currentPost.cdnBaseUrl || ""
-      currentPost.imageObjectKeys.forEach((key, index) => {
-        const imageUrl = cdn.getUrl(cdnBaseUrl, key)
-        const preview = createImagePreview(imageUrl, index, true, key)
-        imagePreviewContainer.appendChild(preview)
-      })
+      // Load images in order
+      for (let index = 0; index < currentPost.imageObjectKeys.length; index++) {
+        const key = currentPost.imageObjectKeys[index]
+        try {
+          const blob = await cdn.fetchImage(cdnBaseUrl, key)
+          const imageUrl = URL.createObjectURL(blob)
+          const preview = createImagePreview(imageUrl, index, true, key)
+          imagePreviewContainer.appendChild(preview)
+        } catch (error) {
+          console.error("Failed to load edit image:", error)
+        }
+      }
     }
     
     modal.style.display = "flex"
@@ -493,24 +491,21 @@ function createCommentItem(comment, cdnBaseUrl) {
   const authorInfo = dom.create("div", { className: "comment-author-info" })
   
   const avatar = dom.create("img", {
-    src: comment.author.profileImageObjectKey 
-      ? cdn.getUrl(cdnBaseUrl, comment.author.profileImageObjectKey)
-      : "/user-profile-illustration.png",
+    src: "/user-profile-illustration.png", // Default placeholder
     alt: comment.author.name,
     className: "comment-avatar",
   })
   
-  // Handle avatar load error with signed cookie retry
+  // Load avatar using signed cookie
   if (comment.author.profileImageObjectKey) {
-    avatar.addEventListener("error", async () => {
-      try {
-        const blob = await cdn.fetchImage(cdnBaseUrl, comment.author.profileImageObjectKey)
+    cdn.fetchImage(cdnBaseUrl, comment.author.profileImageObjectKey)
+      .then((blob) => {
         avatar.src = URL.createObjectURL(blob)
-      } catch (error) {
+      })
+      .catch((error) => {
         console.error("Failed to load comment avatar:", error)
-        avatar.src = "/user-profile-illustration.png"
-      }
-    })
+        // Keep default placeholder image
+      })
   }
   
   const authorDetails = dom.create("div", { className: "comment-author-details" })

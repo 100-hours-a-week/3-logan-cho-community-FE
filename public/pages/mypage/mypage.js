@@ -43,28 +43,16 @@ let selectedFile = null
 async function loadProfile() {
   try {
     const profile = await api.getProfile()
+    const cdnBaseUrl = profile.cdnBaseUrl || ""
 
     // Update display - profile image with CDN
-    if (profile.imageObjectKey) {
-      // For mypage, we might need CDN base URL - check if it's provided
-      // If not, try to use the image object key directly or with a CDN helper
+    if (profile.imageObjectKey && cdnBaseUrl) {
+      // Load image using signed cookie
       try {
-        // First try to load the image directly
-        profileImage.src = profile.imageObjectKey
-        
-        // If it fails, we'll handle it in the error event
-        profileImage.addEventListener("error", async () => {
-          try {
-            // Try to get CDN URL if available
-            // For now, use placeholder as fallback
-            profileImage.src = "/user-profile-illustration.png"
-          } catch (err) {
-            console.error("Failed to load profile image:", err)
-            profileImage.src = "/user-profile-illustration.png"
-          }
-        }, { once: true })
+        const blob = await cdn.fetchImage(cdnBaseUrl, profile.imageObjectKey)
+        profileImage.src = URL.createObjectURL(blob)
       } catch (error) {
-        console.error("Profile image error:", error)
+        console.error("Failed to load profile image:", error)
         profileImage.src = "/user-profile-illustration.png"
       }
     } else {
