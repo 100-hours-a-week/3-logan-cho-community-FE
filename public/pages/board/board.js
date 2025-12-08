@@ -97,7 +97,8 @@ async function loadPosts() {
 
   try {
     const response = await api.getPosts({
-      strategy: nextCursor ? undefined : currentStrategy,
+      // 전략은 페이지네이션 요청에도 항상 전달하여 탭 상태를 유지한다
+      strategy: currentStrategy,
       cursor: nextCursor,
     })
 
