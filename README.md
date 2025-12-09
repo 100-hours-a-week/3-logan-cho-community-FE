@@ -126,30 +126,32 @@ Vanilla JavaScript를 사용하여 구현했으며, 프론트엔드와 백엔드
 - `storage.js`: 로컬 스토리지 관리
 - `common.js`: 공통 함수 (날짜 포맷팅 등)
 
+
 ## 서비스 화면
 
 ### 홈
 <img src="docs/images/home.png" width="800" alt="홈 화면">
 
 ### 인증
-| 로그인 | 회원가입 |
-|--------|----------|
+| 로그인 | 회원가입 | 이메일 |
+|--------|----------|----------|
 | <img src="docs/images/login.png" width="400" alt="로그인"> | <img src="docs/images/signup.png" width="400" alt="회원가입"> |
 
-### 게시글
+### 게시글 조회
 | 게시글 목록 | 게시글 상세 |
 |------------|------------|
 | <img src="docs/images/board.png" width="400" alt="게시글 목록"> | <img src="docs/images/post-detail.png" width="400" alt="게시글 상세"> |
 
-### 댓글
-| 댓글 목록 | 댓글 작성 |
-|----------|----------|
-| <img src="docs/images/comments.png" width="400" alt="댓글 목록"> | <img src="docs/images/comment-write.png" width="400" alt="댓글 작성"> |
+### 게시글 편집
+| 게시글 등록                                                          | 게시글 수정                                                         |
+|-----------------------------------------------------------------|----------------------------------------------------------------|
+| <img src="docs/images/write-post.png" width="400" alt="게시글 등록"> | <img src="docs/images/edit-post.png" width="400" alt="게시글 수정"> |
 
-### 마이페이지
-| 프로필 수정 | 비밀번호 변경 |
-|-----------|--------------|
-| <img src="docs/images/mypage.png" width="400" alt="마이페이지"> | <img src="docs/images/change-password.png" width="400" alt="비밀번호 변경"> |
+### 회원 복구
+| 복구 팝업                                                                    | 회원 복구                                                         |
+|--------------------------------------------------------------------------|---------------------------------------------------------------|
+| <img src="docs/images/recover-possibility.png" width="400" alt="마이페이지"> | <img src="docs/images/recover.png" width="400" alt="비밀번호 변경"> |
+
 
 ## 트러블 슈팅
 
